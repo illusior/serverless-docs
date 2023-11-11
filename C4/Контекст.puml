@@ -11,23 +11,33 @@
 
 LAYOUT_WITH_LEGEND()
 
-Person(user, "Пользователи", "Люди которые нуждаются в продукте", $sprite="users")
+Person(user_auth, "Зарегестрированные пользователи", "Люди имеют аккаунт в сервисе", $sprite="users")
+Person(user_not_auth, "Незарегестрированные пользователи", "Люди не имеют аккаунта в сервисе", $sprite="users")
+Person(admin, "Администратор", "Следит за системой, добавляет обЪеты в бд по необходимости", $sprite="users")
+
 Container(spa, "SPA", "ReactTS", "Основной интерфейс, с которым взаимодействует клиент", $sprite="React")
 Container(api_1, "API", "Python, Fast-api", "Обработка логики заполнения базы данных", $sprite="python")
 ContainerDb(db, "Database", "PostgresSQL", "Хранит информацию о функциях, пользователях и триггерах", $sprite="msql_server")
 
 
-Person_Ext(external_user, "Внешние сервисы", "Сервисы которые отправляют нам данные", $sprite="users")
+
+Person_Ext(discord, "Discord", "Дискорд для создания ботов", $sprite="users")
+Person_Ext(github, "Github", "Гитхаб для получения коммитов и тп", $sprite="users")
+Person_Ext(api, "API", "Простые запросы к нашему api", $sprite="users")
+
 Container(api_2, "API_triggers", "Python", "Обработка запросов, на запуск функций по триггеру", $sprite="python")
 Container(api_2, "API_triggers", "Python", "Обработка запросов, на запуск функций по триггеру", $sprite="celery")
 
-System(docker, "Докер", "Создание контейнера, выполнение кода, получение результата")
+Rel(user_auth, spa, "Использует", "https")
+Rel(user_not_auth, spa, "Использует", "https")
+Rel(admin, spa, "Использует", "https")
 
-Rel(user, spa, "Использует", "https")
 Rel(spa, api_1, "Использует", "https")
 Rel_R(api_1, db, "Чтение/запись")
 
-Rel(external_user, api_2, "Использует", 'https')
+Rel(discord, api_2, "Использует", 'https')
+Rel(github, api_2, "Использует", 'https')
+Rel(api, api_2, "Использует", 'https')
 Rel_L(api_2, db, "Чтение")
-Rel(api_2, docker, 'Отправка')
+
 @enduml
