@@ -1,0 +1,91 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+!define DEVICONS https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/devicons
+!define FONTAWESOME https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/font-awesome-5
+!include DEVICONS/react.puml
+!include DEVICONS/python.puml
+!include DEVICONS/postgresql.puml
+!include FONTAWESOME/users.puml
+
+
+LAYOUT_WITH_LEGEND()
+
+Person(user_auth, "Зарегестрированные пользователи", "Люди имеют аккаунт в сервисе", $sprite="users")
+Person(user_not_auth, "Незарегестрированные пользователи", "Люди не имеют аккаунта в сервисе", $sprite="users")
+Person(admin, "Администратор", "Следит за системой, добавляет обЪеты в бд по необходимости", $sprite="users")
+
+Container(spa, "SPA", "ReactTS", "Основной интерфейс, с которым взаимодействует клиент", $sprite="React")
+
+Rel(user_auth, spa, "Использует", "https")
+Rel(user_not_auth, spa, "Использует", "https")
+Rel(admin, spa, "Использует", "https")
+
+
+System_Boundary(api_1, "Первый бэкенд", $link="https://github.com/plantuml-stdlib/C4-PlantUML") {
+
+    Container(jwt, "Генерация jwt токена", "модуль", "Генерация токена для идетификации пользователя")
+    Container(crud_gen, "Генерация crud оперций", "модуль", "Генерация crud операций над моделями бд")
+    Container(dto, "Валидация входных данных", 'модуль', "Превращение входящего запроса в dto модель")
+    Container(fileload, "Получение файлов", 'модуль', "Преобразование файлов из бд в zip/png")
+
+    Container(sing_in, "Login/singin", "mvc контроллер", "Авторизация/Регистрация", $sprite="python")
+    Container(ide_load, "IDE", "mvc контролер", "Загрузка функций и привязанных тригеров", $sprite="python")
+    Container(function_list, "Список функций", "mvc контроллер", "Получение функций пользователя", $sprite="python")
+    Container(trigger_list, "Список триггеров", "mvc контроллер", "Получение доступных триггеров", $sprite="python")
+    Container(get_db_info, "DB Connector", "mvc контролер", "Получение/запись данных в базу", $sprite="python")
+}
+
+ContainerDb(db, "Database", "PostgresSQL", "Хранит информацию о функциях, пользователях и триггерах", $sprite="msql_server")
+
+
+Person_Ext(discord, "Discord", "Дискорд для создания ботов", $sprite="users")
+Person_Ext(github, "Github", "Гитхаб для получения коммитов и тп", $sprite="users")
+Person_Ext(api, "API", "Простые запросы к нашему api", $sprite="users")
+
+Container(api_2, "API_triggers", "Python", "Обработка запросов, на запуск функций по триггеру", $sprite="python")
+Container(api_2, "API_triggers", "Python", "Обработка запросов, на запуск функций по триггеру", $sprite="celery")
+
+Rel(spa, dto, "Отправляет запрос в", "https")
+Rel(dto, crud_gen, "Предоставляет пути для crud моделей", "https")
+
+Rel(dto, sing_in, "Вызывает api чтобы", "https")
+Rel(dto, ide_load, "Вызывает api чтобы", "https")
+Rel(dto, function_list, "Вызывает api чтобы", "https")
+Rel(dto, trigger_list, "Вызывает api чтобы", "https")
+
+Rel(function_list, get_db_info, "Использует", "https")
+Rel(sing_in, get_db_info, "Использует", "https")
+Rel(ide_load, get_db_info, "Использует", "https")
+Rel(trigger_list, get_db_info, "Использует", "https")
+Rel(get_db_info, db, "Чтение из /Загрузка в", "https")
+
+Rel(crud_gen, get_db_info, "Обрабатывает crud для некоторых-моделей", "https")
+Rel(sing_in, jwt, "Получение/сравнение токена", "2")
+Rel(spa, fileload, "Получение файла", "https")
+Rel(fileload, get_db_info, "Получение файла из бд", "https")
+
+System_Boundary(api_2, "Второй бэкенд", $link="https://github.com/plantuml-stdlib/C4-PlantUML") {
+    Container(Handler, "Обработчик запросов", "mvc контроллер", "Получение запросов на вызов функций", $sprite="python")
+    ContainerQueue(celery, 'Очередь заданий', 'celery', 'Выполнение задач в фоновом режиме')
+    ContainerDb(db_redis, "Database", "Redis", "Служит для передачи данных", $sprite="msql_server")
+
+    Container(container_create, "Создание контейнера", "Функция", "Создание контейнера в соответсвии с требованиями", $sprite="python")
+    Container(container_load, "Передача данных", "Функция", "Отправка в контейнер данных для последовательных задач", $sprite="python")
+}
+
+Rel(discord, Handler, "Использует", 'https')
+Rel(github, Handler, "Использует", 'https')
+Rel(api, Handler, "Использует", 'https')
+
+Rel(Handler, db, "Читает из", 'https')
+
+Rel_R(Handler, db_redis, "Забирает задачу из")
+Rel(db_redis, celery, "Отправляет в")
+
+Rel_L(celery, Handler, 'Уведомляет')
+Rel(celery, db_redis, 'Сохраняет результат в')
+
+Rel(celery, container_create, "умеет")
+Rel(celery, container_load, "умеет")
+@enduml
