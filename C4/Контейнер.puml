@@ -15,23 +15,23 @@ Person(user_auth, "Зарегестрированные пользователи
 Person(user_not_auth, "Незарегестрированные пользователи", "Люди не имеют аккаунта в сервисе", $sprite="users")
 Person(admin, "Администратор", "Следит за системой, добавляет обЪеты в бд по необходимости", $sprite="users")
 
-Container(spa, "SPA", "ReactTS", "Основной интерфейс, с которым взаимодействует клиент", $sprite="React")
+System_Boundary(backend_container, "API"){
+    Container(api_1, "API", "Python, Fast-api", "Обработка логики заполнения базы данных", $sprite="python")
+}
+
+System_Boundary(web_container, "WEB"){
+    Container(spa, "SPA", "ReactTS", "Основной интерфейс, с которым взаимодействует клиент", $sprite="React")
+}
 
 Rel(user_auth, spa, "Использует", "https")
 Rel(user_not_auth, spa, "Использует", "https")
 Rel(admin, spa, "Использует", "https")
 
-
-System_Boundary(api_1, "Первый бэкенд", $link="https://github.com/plantuml-stdlib/C4-PlantUML") {
-    Container(sing_in, "Login/singin", "mvc контроллер", "Авторизация/Регистрация", $sprite="python")
-    Container(ide_load, "IDE", "mvc контролер", "Загрузка функций и привязанных тригеров", $sprite="python")
-    Container(function_list, "Список функций", "mvc контроллер", "Получение функций пользователя", $sprite="python")
-    Container(trigger_list, "Список триггеров", "mvc контроллер", "Получение доступных триггеров", $sprite="python")
-    Container(get_db_info, "DB Connector", "mvc контролер", "Получение/запись данных в базу", $sprite="python")
+System_Boundary(db_container, "database"){
+    ContainerDb(db, "Database", "PostgresSQL", "Хранит информацию о функциях, пользователях и триггерах", $sprite="msql_server")
 }
 
-ContainerDb(db, "Database", "PostgresSQL", "Хранит информацию о функциях, пользователях и триггерах", $sprite="msql_server")
-
+Rel(api_1, db, "Сохраняет в", "")
 
 Person_Ext(discord, "Discord", "Дискорд для создания ботов", $sprite="users")
 Person_Ext(github, "Github", "Гитхаб для получения коммитов и тп", $sprite="users")
@@ -41,16 +41,7 @@ Container(api_2, "API_triggers", "Python", "Обработка запросов,
 Container(api_2, "API_triggers", "Python", "Обработка запросов, на запуск функций по триггеру", $sprite="celery")
 
 
-Rel(spa, sing_in, "Вызывает api чтобы", "https")
-Rel(spa, ide_load, "Вызывает api чтобы", "https")
-Rel(spa, function_list, "Вызывает api чтобы", "https")
-Rel(spa, trigger_list, "Вызывает api чтобы", "https")
-
-Rel(function_list, get_db_info, "Использует", "https")
-Rel(sing_in, get_db_info, "Использует", "https")
-Rel(ide_load, get_db_info, "Использует", "https")
-Rel(trigger_list, get_db_info, "Использует", "https")
-Rel(get_db_info, db, "Чтение из /Загрузка в", "https")
+Rel(spa, api_1, "Вызывает api для добавления в базу", "https")
 
 
 System_Boundary(api_2, "Второй бэкенд", $link="https://github.com/plantuml-stdlib/C4-PlantUML") {
