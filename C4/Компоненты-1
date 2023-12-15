@@ -1,0 +1,48 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+!define DEVICONS https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/devicons
+!define FONTAWESOME https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/font-awesome-5
+!include DEVICONS/react.puml
+!include DEVICONS/python.puml
+!include DEVICONS/postgresql.puml
+!include FONTAWESOME/users.puml
+
+
+LAYOUT_WITH_LEGEND()
+
+
+Container(spa, "SPA", "ReactTS", "Основной интерфейс, с которым взаимодействует клиент", $sprite="React")
+
+System_Boundary(api_1, "Первый бэкенд", $link="https://github.com/plantuml-stdlib/C4-PlantUML") {
+
+    Container(jwt, "Генерация jwt токена", "class", "Генерация токена для идетификации пользователя")
+    Container(crud_gen, "Генерация crud оперций", "class", "Генерация crud операций над моделями бд")
+    Container(dto, "Валидация входных данных", 'модуль', "Превращение входящего запроса в dto модель")
+
+    Container(sing_in, "Login/singin", "mvc контроллер", "Авторизация/Регистрация", $sprite="python")
+    Container(ide_load, "IDE", "mvc контролер", "Загрузка функций и привязанных тригеров", $sprite="python")
+    Container(function_list, "Список функций", "mvc контроллер", "Получение функций пользователя", $sprite="python")
+    Container(trigger_list, "Список триггеров", "mvc контроллер", "Получение доступных триггеров", $sprite="python")
+    Container(get_db_info, "DB Connector", "mvc контролер", "Получение/запись данных в базу", $sprite="python")
+}
+
+ContainerDb(db, "Database", "PostgresSQL", "Хранит информацию о функциях, пользователях и триггерах", $sprite="msql_server")
+
+Rel(spa, dto, "Отправляет запрос в", "https")
+Rel(spa, crud_gen, "Предоставляет пути для crud моделей", "https")
+
+Rel(dto, sing_in, "Вызывает api чтобы", "https")
+Rel(dto, ide_load, "Вызывает api чтобы", "https")
+Rel(dto, function_list, "Вызывает api чтобы", "https")
+Rel(dto, trigger_list, "Вызывает api чтобы", "https")
+
+Rel(function_list, get_db_info, "Использует", "https")
+Rel(sing_in, get_db_info, "Использует", "https")
+Rel(ide_load, get_db_info, "Использует", "https")
+Rel(trigger_list, get_db_info, "Использует", "https")
+Rel(get_db_info, db, "Чтение из /Загрузка в", "https")
+
+Rel(crud_gen, get_db_info, "Обрабатывает crud для некоторых-моделей", "https")
+Rel(sing_in, jwt, "Получение/сравнение токена", "2")
+@enduml
