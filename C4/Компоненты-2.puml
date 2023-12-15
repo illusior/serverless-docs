@@ -1,0 +1,44 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+!define DEVICONS https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/devicons
+!define FONTAWESOME https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/font-awesome-5
+!include DEVICONS/react.puml
+!include DEVICONS/python.puml
+!include DEVICONS/postgresql.puml
+!include FONTAWESOME/users.puml
+
+
+LAYOUT_WITH_LEGEND()
+
+
+
+
+ContainerDb(db, "Database", "PostgresSQL", "Хранит информацию о функциях, пользователях и триггерах", $sprite="msql_server")
+
+
+Person_Ext(discord, "Discord", "Дискорд для создания ботов", $sprite="users")
+Person_Ext(github, "Github", "Гитхаб для получения коммитов и тп", $sprite="users")
+Person_Ext(api, "API", "Простые запросы к нашему api", $sprite="users")
+
+Container(api_2, "API_triggers", "Python", "Обработка запросов, на запуск функций по триггеру", $sprite="python")
+Container(api_2, "API_triggers", "Python", "Обработка запросов, на запуск функций по триггеру", $sprite="celery")
+
+System_Boundary(api_2, "Второй бэкенд", $link="https://github.com/plantuml-stdlib/C4-PlantUML") {
+    Container(Handler, "Обработчик запросов", "mvc контроллер", "Получение запросов на вызов функций", $sprite="python")
+    ContainerQueue(celery, 'Очередь заданий', 'celery', 'Выполнение задач в фоновом режиме')
+    ContainerDb(db_redis, "Database", "Redis", "Служит для передачи данных", $sprite="msql_server")
+}
+
+Rel(discord, Handler, "Использует", 'https')
+Rel(github, Handler, "Использует", 'https')
+Rel(api, Handler, "Использует", 'https')
+
+Rel(Handler, db, "Читает из", 'https')
+
+Rel_R(Handler, db_redis, "Забирает задачу из")
+Rel(db_redis, celery, "Отправляет в")
+
+Rel_L(celery, Handler, 'Уведомляет')
+Rel(celery, db_redis, 'Сохраняет результат в')
+@enduml
