@@ -1,16 +1,16 @@
 @startuml
 hide empty description
 
-state "WorkFlow Создан" as workflow_1
-state "Поле триггер функция создана" as workflow_2
-state "Функция указана" as workflow_3
-state "Триггер и функция объединены " as workflow_4
-state "WorkFlow создан полностью" as workflow_5
+state "WorkSpace Создан" as WorkSpace_1
+state "Поле триггер функция создана" as WorkSpace_2
+state "Функция указана" as WorkSpace_3
+state "Триггер и функция объединены " as WorkSpace_4
+state "WorkSpace создан полностью" as WorkSpace_5
 
-workflow_1 --> workflow_2
-workflow_2 --> workflow_3 : Желаемая функция присутствует
-workflow_3 --> workflow_4 : Указал триггер для активации
-workflow_4 --> workflow_5 : [нажал кнопку сохранить]
+WorkSpace_1 --> WorkSpace_2
+WorkSpace_2 --> WorkSpace_3 : Желаемая функция присутствует
+WorkSpace_3 --> WorkSpace_4 : Указал триггер для активации
+WorkSpace_4 --> WorkSpace_5 : [нажал кнопку сохранить]
 
 state "Выбор способа" as ide
 state "Перешел в IDE" as ide_1
@@ -29,17 +29,17 @@ ide_3 --> ide_4 : Нажал на кнопку сохранить
 ide_3 -> ide_5
 ide_5 -> ide_3 
 
-state "WorkFlow ждет активации" as wait
-state "WorkFlow запустился" as wait_1
-state "WorkFlow Отдал результат" as wait_2
+state "WorkSpace ждет активации" as wait
+state "WorkSpace запустился" as wait_1
+state "WorkSpace Отдал результат" as wait_2
 
 wait -> wait_1 : Поступил триггер
 wait_1 -> wait_2 : Функции выполнелись
 wait_2  --> wait
 
 
-workflow_5 --> wait : [Сохранен в бд]
-workflow_2 -> ide : Желаемая функция отсутствует
-ide_4 --> workflow_3 : Создана
-ide_2 -> workflow_3 : Выбрал подходящую
+WorkSpace_5 --> wait : [Сохранен в бд]
+WorkSpace_2 -> ide : Желаемая функция отсутствует
+ide_4 --> WorkSpace_3 : Создана
+ide_2 -> WorkSpace_3 : Выбрал подходящую
 @enduml
