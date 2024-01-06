@@ -33,3 +33,5 @@ reverseProxy --> frontend : "Перенаправление запроса на 
 reverseProxy -> databaseBackend : "Перенаправление запроса на бэкенд, если запрос сделан на домен/api/\n[TCP/IP]"
 databaseBackend --> triggersBackend : "Регистрация триггеров\n[HTTPS/JSON]"
 triggersBackend -> databaseBackend : "Создание отчётов о статусах триггеров\n[HTTPS/JSON]"
+
+@enduml
