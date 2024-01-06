@@ -1,0 +1,35 @@
+@startuml deployment
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Deployment.puml
+!include <tupadr3/devicons2/postgresql>
+!include <tupadr3/material/queue>
+
+LAYOUT_WITH_LEGEND()
+
+title Диаграмма развертывания Serverless
+
+Deployment_Node(webApp, "Устройство пользователя", "Телефон или Desktop-бразуер") {
+    Container(clientWebApp, "Веб-приложение клиента", "ReactTS", "Serverless")
+}
+
+Deployment_Node(remotePC, "Удалённый хост-сервер с поднятым Docker-мультиконтейнером", "Serverless", "Здесь проложена общая сеть для приложений фронта и бэкендов") {
+    Container(reverseProxy, "Reverse proxy (Nginx) docker-контейнер", "ss-reverse-proxy", "Распределяем запросы по URL'у. Торчит на ружу по адресу домена")
+
+    Container(frontend, "Фронтенд Serverless", "ss-frontend", "Фронтенд приложение, отдающее контент веб-приложения пользователю") {
+    }
+
+    Deployment_Node(backendCluster, "Кластер микросервисов Serverless", "ss-backend-microservices", "Кластер состоит из БД и trigger-backend'a (оба на FastApi), находящимися в одной сети") {
+        Container(databaseBackend, "БД Serverless", "ss-backend-db", "Приложение дающее API к БД проекта. Регистрация пользователей, CRUD функций|триггеров") {
+        }
+
+        Container(triggersBackend, "Триггеры Serverless", "ss-backend-triggers", "Менеджмент пулла задач для запуска функций по триггерам") {
+        }
+    }
+}
+
+clientWebApp --> reverseProxy : "Отправка запроса. Фильтрация запросов к (фронту|кластеру микросервисов) по URl'у\n[HTTPS/JSON]"
+
+reverseProxy --> frontend : "Перенаправление запроса на фронтенд, если запрос сделан на домен\n[TCP/IP]"
+
+reverseProxy -> databaseBackend : "Перенаправление запроса на бэкенд, если запрос сделан на домен/api/\n[TCP/IP]"
+databaseBackend --> triggersBackend : "Регистрация триггеров\n[HTTPS/JSON]"
+triggersBackend -> databaseBackend : "Создание отчётов о статусах триггеров\n[HTTPS/JSON]"
