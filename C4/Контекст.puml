@@ -11,33 +11,17 @@
 
 LAYOUT_WITH_LEGEND()
 
-Person(user_auth, "Зарегестрированные пользователи", "Люди имеют аккаунт в сервисе", $sprite="users")
-Person(user_not_auth, "Незарегестрированные пользователи", "Люди не имеют аккаунта в сервисе", $sprite="users")
-Person(admin, "Администратор", "Следит за системой, добавляет обЪеты в бд по необходимости", $sprite="users")
+Person(user, "Пользователи", "Люди желающие запускать свои скрипты с поомщью триггеров", $sprite="users")
 
-Container(spa, "SPA", "ReactTS", "Основной интерфейс, с которым взаимодействует клиент", $sprite="React")
-Container(api_1, "API", "Python, Fast-api", "Обработка логики заполнения базы данных", $sprite="python")
-ContainerDb(db, "Database", "PostgresSQL", "Хранит информацию о функциях, пользователях и триггерах", $sprite="msql_server")
+Container(app, "Serverless", "System", "Приложение для запуска пользовательских функций, позволяющее писать свои функции на различных языках програмирования, а так же пользоваться чужими публичными функциями. Настраивать запуск этих функций на триггеры", $sprite="React")
 
-
-
-Person_Ext(discord, "Discord", "Дискорд для создания ботов", $sprite="users")
+Person_Ext(discord, "Telegram", "Бот в Месседжере, благодаря которрому можно отправить запрос", $sprite="users")
 Person_Ext(github, "Github", "Гитхаб для получения коммитов и тп", $sprite="users")
-Person_Ext(api, "API", "Простые запросы к нашему api", $sprite="users")
+Person_Ext(api, "API", "Простая возможность запускать функции на свое усмотерние с помощью api", $sprite="users")
 
-Container(api_2, "API_triggers", "Python", "Обработка запросов, на запуск функций по триггеру", $sprite="python")
-Container(api_2, "API_triggers", "Python", "Обработка запросов, на запуск функций по триггеру", $sprite="celery")
 
-Rel(user_auth, spa, "Использует", "https")
-Rel(user_not_auth, spa, "Использует", "https")
-Rel(admin, spa, "Использует", "https")
-
-Rel(spa, api_1, "Использует", "https")
-Rel_R(api_1, db, "Чтение/запись")
-
-Rel(discord, api_2, "Использует", 'https')
-Rel(github, api_2, "Использует", 'https')
-Rel(api, api_2, "Использует", 'https')
-Rel_L(api_2, db, "Чтение")
-
+Rel(user, app, 'Использует')
+Rel(discord, app, 'Использует')
+Rel(github, app, 'Использует')
+Rel(api, app, 'Использует')
 @enduml
