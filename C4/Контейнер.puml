@@ -15,50 +15,43 @@ Person(user_auth, "Зарегестрированные пользователи
 Person(user_not_auth, "Незарегестрированные пользователи", "Люди не имеют аккаунта в сервисе", $sprite="users")
 Person(admin, "Администратор", "Следит за системой, добавляет обЪеты в бд по необходимости", $sprite="users")
 
-System_Boundary(backend_container, "API"){
-    Container(api_1, "API", "Python, Fast-api", "Обработка логики заполнения базы данных", $sprite="python")
-}
-
-System_Boundary(web_container, "WEB"){
-    Container(spa, "SPA", "ReactTS", "Основной интерфейс, с которым взаимодействует клиент", $sprite="React")
-}
-
-Rel(user_auth, spa, "Использует", "https")
-Rel(user_not_auth, spa, "Использует", "https")
-Rel(admin, spa, "Использует", "https")
-
-System_Boundary(db_container, "database"){
-    ContainerDb(db, "Database", "PostgresSQL", "Хранит информацию о функциях, пользователях и триггерах", $sprite="msql_server")
-}
-
-Rel(api_1, db, "Сохраняет в", "")
-
-Person_Ext(discord, "Discord", "Дискорд для создания ботов", $sprite="users")
+Person_Ext(discord, "Telegram", "Бот в Месседжере, благодаря которрому можно отправить запрос", $sprite="users")
 Person_Ext(github, "Github", "Гитхаб для получения коммитов и тп", $sprite="users")
-Person_Ext(api, "API", "Простые запросы к нашему api", $sprite="users")
+Person_Ext(api, "API", "Простая возможность запускать функции на свое усмотерние с помощью api", $sprite="users")
 
-Container(api_2, "API_triggers", "Python", "Обработка запросов, на запуск функций по триггеру", $sprite="python")
-Container(api_2, "API_triggers", "Python", "Обработка запросов, на запуск функций по триггеру", $sprite="celery")
+System_Boundary(main_app, "Servcerless"){
+    Container(spa, "SPA", "ReactTS", "Основной интерфейс, с которым взаимодействует клиент", $sprite="React")
+    Container(api_1, "Api application", "Service", "Предоставляет все функции для взаимодействия с базой данных", $sprite="python")
+    
+    ContainerDb(db, "Database", "PostgresSQL", "Хранит информацию о функциях, пользователях и триггерах", $sprite="msql_server")
 
-
-Rel(spa, api_1, "Вызывает api для добавления в базу", "https")
-
-
-System_Boundary(api_2, "Второй бэкенд", $link="https://github.com/plantuml-stdlib/C4-PlantUML") {
-    Container(Handler, "Обработчик запросов", "mvc контроллер", "Получение запросов на вызов функций", $sprite="python")
-    ContainerQueue(celery, 'Очередь заданий', 'celery', 'Выполнение задач в фоновом режиме')
-    ContainerDb(db_redis, "Database", "Redis", "Служит для передачи данных", $sprite="msql_server")
+    Container(api_2, "Service run function", "Service", "Сервис запуска пользовательских функций", $sprite="python")
+    Container(auth, "Service Authorizations", "Service", "Сервис Регистрации/авторизации пользователя", $sprite="python")
+    Container(ide, "Service write function", "Service", "Сервис Для написания и тестирования функций", $sprite="python")
+    Container(function, "Service find function", "Service", "Сервис для поиска функций", $sprite="python")
+    Container(trigger, "Service workspace", "Service", "Сервис объединения функций и способов их запуска", $sprite="python")
 }
 
-Rel(discord, Handler, "Использует", 'https')
-Rel(github, Handler, "Использует", 'https')
-Rel(api, Handler, "Использует", 'https')
 
-Rel(Handler, db, "Читает из", 'https')
+Rel(user_auth, spa, 'Используют')
+Rel(user_not_auth, spa, 'Используют')
+Rel(admin, spa, 'Используют')
 
-Rel_R(Handler, db_redis, "Забирает задачу из")
-Rel(db_redis, celery, "Отправляет в")
+Rel(spa, api_1, 'Использует')
 
-Rel_L(celery, Handler, 'Уведомляет')
-Rel(celery, db_redis, 'Сохраняет результат в')
+Rel(discord, api_1, 'Используют')
+Rel(github, api_1, 'Используют')
+Rel(api, api_1, 'Используют')
+
+Rel(api_1, api_2, 'Использует')
+Rel(api_1, auth, 'Использует')
+Rel(api_1, ide, 'Использует')
+Rel(api_1, function, 'Использует')
+Rel(api_1, trigger, 'Использует')
+
+Rel(api_2, db, 'Чтение из /Загрузка в')
+Rel(auth, db, 'Чтение из /Загрузка в')
+Rel(ide, db, 'Чтение из /Загрузка в')
+Rel(function, db, 'Чтение из /Загрузка в')
+Rel(trigger, db, 'Чтение из /Загрузка в')
 @enduml
