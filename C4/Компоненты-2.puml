@@ -12,27 +12,17 @@
 LAYOUT_WITH_LEGEND()
 
 
-
-
+Container(api_1, "Api application", "Service", "Предоставляет все функции для взаимодействия с базой данных", $sprite="python")
 ContainerDb(db, "Database", "PostgresSQL", "Хранит информацию о функциях, пользователях и триггерах", $sprite="msql_server")
 
 
-Person_Ext(discord, "Discord", "Дискорд для создания ботов", $sprite="users")
-Person_Ext(github, "Github", "Гитхаб для получения коммитов и тп", $sprite="users")
-Person_Ext(api, "API", "Простые запросы к нашему api", $sprite="users")
-
-Container(api_2, "API_triggers", "Python", "Обработка запросов, на запуск функций по триггеру", $sprite="python")
-Container(api_2, "API_triggers", "Python", "Обработка запросов, на запуск функций по триггеру", $sprite="celery")
-
-System_Boundary(api_2, "Второй бэкенд", $link="https://github.com/plantuml-stdlib/C4-PlantUML") {
-    Container(Handler, "Обработчик запросов", "mvc контроллер", "Получение запросов на вызов функций", $sprite="python")
+System_Boundary(api_2, "Service run function", $link="https://github.com/plantuml-stdlib/C4-PlantUML") {
+    Container(Handler, "Обработчик запросов", "Controller", "Получение запросов на вызов функций", $sprite="python")
     ContainerQueue(celery, 'Очередь заданий', 'celery', 'Выполнение задач в фоновом режиме')
     ContainerDb(db_redis, "Database", "Redis", "Служит для передачи данных", $sprite="msql_server")
 }
 
-Rel(discord, Handler, "Использует", 'https')
-Rel(github, Handler, "Использует", 'https')
-Rel(api, Handler, "Использует", 'https')
+Rel(api_1, Handler, "Использует", 'https')
 
 Rel(Handler, db, "Читает из", 'https')
 
